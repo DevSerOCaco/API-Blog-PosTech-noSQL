@@ -1,30 +1,29 @@
 package com.devserocaco.springblog.controller;
 
-import com.devserocaco.springblog.model.Artigo;
-import com.devserocaco.springblog.service.ArtigoService;
-import com.devserocaco.springblog.service.impl.ArtigoServiceImpl;
+import com.devserocaco.springblog.model.Autor;
+import com.devserocaco.springblog.service.AutorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/artigos")
-public class ArtigoController {
+@RequestMapping(value = "/autores")
+public class AutorController {
 
     @Autowired
-    public ArtigoService artigoService;
+    public AutorService autorService;
 
     @GetMapping
-    public List<Artigo> obterTodos(){
-        return this.artigoService.obterTodos();
+    public List<Autor> obterTodos(){
+        return this.autorService.obterTodos();
     }
     @GetMapping("/{codigo}")
-    public Artigo oberPorCodigo(@PathVariable String codigo){
-        return this.artigoService.obterPorCodigo(codigo);
+    public Autor oberPorCodigo(@PathVariable String codigo){
+        return this.autorService.obterPorCodigo(codigo);
     }
     @PostMapping
-    public Artigo criar(@RequestBody Artigo artigo){
-        return this.artigoService.criar(artigo);
+    public Autor criar(@RequestBody Autor autor){
+        return this.autorService.criar(autor);
     }
 }

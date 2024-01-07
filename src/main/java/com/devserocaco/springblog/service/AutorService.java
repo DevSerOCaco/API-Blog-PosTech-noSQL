@@ -1,12 +1,13 @@
 package com.devserocaco.springblog.service;
 
-import com.devserocaco.springblog.model.Artigo;
+import com.devserocaco.springblog.model.Autor;
 
 import java.util.List;
 
-public interface ArtigoService {
+public interface AutorService {
 
-    public List<Artigo> obterTodos();
-    public Artigo obterPorCodigo(String codigo);
-    public Artigo criar(Artigo artigo);
+    public List<Autor> obterTodos();
+    public Autor obterPorCodigo(String codigo);
+    public Autor criar(Autor autor);
+
 }
