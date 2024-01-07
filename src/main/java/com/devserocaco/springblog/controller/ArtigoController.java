@@ -71,5 +71,12 @@ public class ArtigoController {
                                                 @RequestParam LocalDateTime ate){
         return this.artigoService.obterArtigoPorDataHora(de, ate);
     }
+    @GetMapping("/artigo-complexos")
+    public List<Artigo> encontrarArtigosComplexos(@RequestParam Integer status,
+                                                  @RequestParam LocalDateTime data,
+                                                  @RequestParam String titulo) {
+        return this.artigoService.encontrarArtigosComplexos(status, data, titulo);
+
+    }
 
 }
