@@ -4,6 +4,9 @@ import com.devserocaco.springblog.model.Artigo;
 import com.devserocaco.springblog.service.ArtigoService;
 import com.devserocaco.springblog.service.impl.ArtigoServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -72,11 +75,16 @@ public class ArtigoController {
         return this.artigoService.obterArtigoPorDataHora(de, ate);
     }
     @GetMapping("/artigo-complexos")
-    public List<Artigo> encontrarArtigosComplexos(@RequestParam Integer status,
+    public List<Artigo> encontrarArtigosComplexos(@RequestParam(required = false) Integer status,
                                                   @RequestParam LocalDateTime data,
-                                                  @RequestParam String titulo) {
+                                                  @RequestParam(required = false) String titulo) {
         return this.artigoService.encontrarArtigosComplexos(status, data, titulo);
 
     }
 
+    @GetMapping("/pagina-artigos")
+    public ResponseEntity<Page<Artigo>> findAll(Pageable pageable){
+        Page<Artigo> artigos = this.artigoService.findAll(pageable);
+        return ResponseEntity.ok(artigos);
+    }
 }
