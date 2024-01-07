@@ -87,4 +87,12 @@ public class ArtigoController {
         Page<Artigo> artigos = this.artigoService.findAll(pageable);
         return ResponseEntity.ok(artigos);
     }
+    @GetMapping("/status-ordenado")
+    public List<Artigo> findByStatusOrderByTituloAsc(@RequestParam Integer status){
+        return this.artigoService.findByStatusOrderByTituloAsc(status);
+    }
+    @GetMapping("/status-query-ordenado")
+    public List<Artigo> obterArtigosPorStatusComOrdenacao(@RequestParam Integer status){
+        return this.artigoService.obterArtigosPorStatusComOrdenacao(status);
+    }
 }

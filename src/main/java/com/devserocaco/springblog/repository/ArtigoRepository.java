@@ -14,10 +14,18 @@ import java.util.List;
 public interface ArtigoRepository extends MongoRepository<Artigo, String> {
     // Se precisar de métodos personalizados, você pode adicioná-los aqui
     public void deleteById(String id);
+
     public List<Artigo> findByStatusAndDataGreaterThan(Integer status, LocalDateTime data);
+
     @Query("{ $and:  [ {'data':{ $gte: ?0 }}, { 'data': { $lte: ?1 }} ] }")//?0 pega o parametro "de" e o ?1 o parametro "aTE";
     public List<Artigo> obterArtigoPorDataHora(LocalDateTime de, LocalDateTime ate);
+
     Page<Artigo> findAll(Pageable pageable);
 
+    public List<Artigo> findByStatusOrderByTituloAsc(Integer status);
+
+    @Query(value = "{ 'status' :  { $eq: ?0 } }",
+            sort = "{ 'titulo' :  -1 }")
+    public List<Artigo> obterArtigosPorStatusComOrdenacao(Integer status);
 
 }
