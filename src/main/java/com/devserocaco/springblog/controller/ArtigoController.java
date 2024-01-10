@@ -2,6 +2,7 @@ package com.devserocaco.springblog.controller;
 
 import com.devserocaco.springblog.model.Artigo;
 import com.devserocaco.springblog.model.ArtigoStatusCount;
+import com.devserocaco.springblog.model.AutorTotalArtigo;
 import com.devserocaco.springblog.service.ArtigoService;
 import com.devserocaco.springblog.service.impl.ArtigoServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,5 +105,11 @@ public class ArtigoController {
     @GetMapping("/contar-artigo")
     public List<ArtigoStatusCount> contarArtigosPorStatus() {
         return this.artigoService.contarArtigosPorStatus();
+    }
+
+    @GetMapping("/total-artigo-autor-periodo")
+    public List<AutorTotalArtigo> calcularTotalArtigosPorAutorNoPeriodo(@RequestParam LocalDateTime dataInicio,
+                                                                        @RequestParam LocalDateTime dataFim){
+        return this.artigoService.calcularTotalArtigosPorAutorNoPeriodo(dataInicio, dataFim);
     }
  }

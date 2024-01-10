@@ -3,6 +3,7 @@ package com.devserocaco.springblog.service.impl;
 import com.devserocaco.springblog.model.Artigo;
 import com.devserocaco.springblog.model.ArtigoStatusCount;
 import com.devserocaco.springblog.model.Autor;
+import com.devserocaco.springblog.model.AutorTotalArtigo;
 import com.devserocaco.springblog.repository.ArtigoRepository;
 import com.devserocaco.springblog.repository.AutorRepository;
 import com.devserocaco.springblog.service.ArtigoService;
@@ -171,6 +172,23 @@ public class ArtigoServiceImpl implements ArtigoService {
                         .previousOperation()
         );
         AggregationResults<ArtigoStatusCount> result = mongoTemplate.aggregate(aggregation, ArtigoStatusCount.class);
+
+        return result.getMappedResults();
+    }
+
+    @Override
+    public List<AutorTotalArtigo> calcularTotalArtigosPorAutorNoPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim) {
+        TypedAggregation<Artigo> aggregation = Aggregation.newAggregation(
+                Artigo.class,
+                Aggregation.match(
+                        Criteria.where("data").gte(dataInicio.toLocalDate().atStartOfDay())
+                                .lte(dataFim.toLocalDate().atStartOfDay())
+                ),
+                Aggregation.group("autor").count().as("totalArtigos"),
+                Aggregation.project("totalArtigos").and("autor")
+                        .previousOperation()
+        );
+        AggregationResults<AutorTotalArtigo> result = mongoTemplate.aggregate(aggregation, AutorTotalArtigo.class);
 
         return result.getMappedResults();
     }
