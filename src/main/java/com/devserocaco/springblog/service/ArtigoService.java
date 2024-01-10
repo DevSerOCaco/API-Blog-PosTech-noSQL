@@ -1,6 +1,7 @@
 package com.devserocaco.springblog.service;
 
 import com.devserocaco.springblog.model.Artigo;
+import com.devserocaco.springblog.model.ArtigoStatusCount;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,4 +24,6 @@ public interface ArtigoService {
     Page<Artigo> findAll(Pageable pageable);
     public List<Artigo> findByStatusOrderByTituloAsc(Integer status);
     public List<Artigo> obterArtigosPorStatusComOrdenacao(Integer status);
+    public List<Artigo> findiByTexto(String searchTerm);
+    public List<ArtigoStatusCount> contarArtigosPorStatus();
 }

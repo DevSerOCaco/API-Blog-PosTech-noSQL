@@ -1,6 +1,7 @@
 package com.devserocaco.springblog.controller;
 
 import com.devserocaco.springblog.model.Artigo;
+import com.devserocaco.springblog.model.ArtigoStatusCount;
 import com.devserocaco.springblog.service.ArtigoService;
 import com.devserocaco.springblog.service.impl.ArtigoServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,4 +96,13 @@ public class ArtigoController {
     public List<Artigo> obterArtigosPorStatusComOrdenacao(@RequestParam Integer status){
         return this.artigoService.obterArtigosPorStatusComOrdenacao(status);
     }
-}
+
+    @GetMapping("/buscatexto")
+    public List<Artigo> findiByTexto(@RequestParam String searchTerm){
+        return this.artigoService.findiByTexto(searchTerm);
+    }
+    @GetMapping("/contar-artigo")
+    public List<ArtigoStatusCount> contarArtigosPorStatus() {
+        return this.artigoService.contarArtigosPorStatus();
+    }
+ }

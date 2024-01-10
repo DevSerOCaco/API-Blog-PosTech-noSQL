@@ -1,17 +1,22 @@
 package com.devserocaco.springblog.service.impl;
 
 import com.devserocaco.springblog.model.Artigo;
+import com.devserocaco.springblog.model.ArtigoStatusCount;
 import com.devserocaco.springblog.model.Autor;
 import com.devserocaco.springblog.repository.ArtigoRepository;
 import com.devserocaco.springblog.repository.AutorRepository;
 import com.devserocaco.springblog.service.ArtigoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
+import org.springframework.data.mongodb.core.query.*;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -132,7 +137,11 @@ public class ArtigoServiceImpl implements ArtigoService {
 
     @Override
     public Page<Artigo> findAll(Pageable pageable) {
-        return this.artigoRepository.findAll(pageable);
+        Sort sort = Sort.by("titulo").descending();
+        Pageable paginacao = PageRequest.of(pageable.getPageNumber(),
+                                            pageable.getPageSize(), sort);
+
+        return this.artigoRepository.findAll(paginacao);
     }
 
     @Override
@@ -143,6 +152,27 @@ public class ArtigoServiceImpl implements ArtigoService {
     @Override
     public List<Artigo> obterArtigosPorStatusComOrdenacao(Integer status) {
         return this.artigoRepository.obterArtigosPorStatusComOrdenacao(status);
+    }
+
+    @Override
+    public List<Artigo> findiByTexto(String searchTerm) {
+        TextCriteria textCriteria = TextCriteria.forDefaultLanguage().matchingPhrase(searchTerm);
+        TextQuery textQuery = TextQuery.queryText(textCriteria).sortByScore();
+        return mongoTemplate.find(textQuery, Artigo.class);
+
+    }
+
+    @Override
+    public List<ArtigoStatusCount> contarArtigosPorStatus() {
+        TypedAggregation<Artigo> aggregation = Aggregation.newAggregation(
+                Artigo.class,
+                Aggregation.group("status").count().as("quantidade"),
+                Aggregation.project("quantidade").and("status")
+                        .previousOperation()
+        );
+        AggregationResults<ArtigoStatusCount> result = mongoTemplate.aggregate(aggregation, ArtigoStatusCount.class);
+
+        return result.getMappedResults();
     }
 
 }
