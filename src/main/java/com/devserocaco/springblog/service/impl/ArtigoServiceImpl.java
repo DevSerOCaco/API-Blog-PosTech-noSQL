@@ -8,6 +8,7 @@ import com.devserocaco.springblog.repository.ArtigoRepository;
 import com.devserocaco.springblog.repository.AutorRepository;
 import com.devserocaco.springblog.service.ArtigoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,11 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.*;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +38,14 @@ public class ArtigoServiceImpl implements ArtigoService {
     @Autowired
     private AutorRepository autorRepository;
 
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<String> handleOptimistcLockingFaulureException(
+            OptimisticLockingFailureException ex) {
+        return  ResponseEntity.status(HttpStatus.CONFLICT).
+                body("Erro de concorrência: O Artigo foi atualizado por outro usuario");
+    }
+
+
     public ArtigoServiceImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
@@ -43,6 +56,7 @@ public class ArtigoServiceImpl implements ArtigoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Artigo obterPorCodigo(String codigo) {
         return this.artigoRepository
                 .findById(codigo)
@@ -50,7 +64,9 @@ public class ArtigoServiceImpl implements ArtigoService {
     }
 
     @Override
+    @Transactional
     public Artigo criar(Artigo artigo) {
+
         if(artigo.getAutor().getCodigo() != null){
             Autor autor = this.autorRepository
                     .findById(artigo.getAutor().getCodigo())
@@ -59,7 +75,24 @@ public class ArtigoServiceImpl implements ArtigoService {
         } else {
             artigo.setAutor(null);
         }
-        return this.artigoRepository.save(artigo);
+        try{
+            return this.artigoRepository.save(artigo);
+        } catch (OptimisticLockingFailureException ex) {
+            Artigo atualizado = artigoRepository.findById(artigo.getCodigo()).orElse(null);
+            if (atualizado != null) {
+                atualizado.setTitulo(artigo.getTitulo());
+                atualizado.setTexto(artigo.getTexto());
+                atualizado.setStatus(artigo.getStatus());
+
+                atualizado.setVersion(atualizado.getVersion() + 1);
+
+
+            }
+            return this.artigoRepository.save(artigo);
+        }
+
+
+
     }
 
     @Override
@@ -79,6 +112,7 @@ public class ArtigoServiceImpl implements ArtigoService {
     }
 
     @Override
+    @Transactional
     public Artigo atualizar(Artigo artigo) {
         if (artigoRepository.existsById(artigo.getCodigo())) {
             // Atualiza o artigo existente
@@ -90,6 +124,7 @@ public class ArtigoServiceImpl implements ArtigoService {
     }
 
     @Override
+    @Transactional
     public void atualizarArtigo(String id, String novaURL) {
         //aqui define o criterio de busca
        Query query = new Query(Criteria.where("_id").is(id));
@@ -97,9 +132,11 @@ public class ArtigoServiceImpl implements ArtigoService {
        Update update = new Update().set("url", novaURL);
        //aqui executa a atualização no banco
        this.mongoTemplate.updateFirst(query, update, Artigo.class);
+
     }
 
     @Override
+    @Transactional
     public void deleteById(String id){
         this.artigoRepository.deleteById(id);
     }
