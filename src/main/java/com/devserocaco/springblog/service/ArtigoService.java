@@ -6,6 +6,7 @@ import com.devserocaco.springblog.model.ArtigoStatusCount;
 import com.devserocaco.springblog.model.AutorTotalArtigo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,7 +15,9 @@ public interface ArtigoService {
 
     public List<Artigo> obterTodos();
     public Artigo obterPorCodigo(String codigo);
-    public Artigo criar(Artigo artigo);
+    /*public Artigo criar(Artigo artigo);*/
+    public ResponseEntity<?> criar(Artigo artigo);
+    public ResponseEntity<?> atualizarArtigo(String id, Artigo artigo);
     public List<Artigo> findByDataGreaterThan(LocalDateTime data);
     public List<Artigo> findByDataAndStatus(LocalDateTime data, Integer status);
     public Artigo atualizar(Artigo artigo);

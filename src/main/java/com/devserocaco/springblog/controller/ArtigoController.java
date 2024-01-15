@@ -5,6 +5,7 @@ import com.devserocaco.springblog.model.ArtigoStatusCount;
 import com.devserocaco.springblog.model.AutorTotalArtigo;
 import com.devserocaco.springblog.service.ArtigoService;
 import com.devserocaco.springblog.service.impl.ArtigoServiceImpl;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,10 +30,21 @@ public class ArtigoController {
     public Artigo oberPorCodigo(@PathVariable String codigo){
         return this.artigoService.obterPorCodigo(codigo);
     }
-    @PostMapping
+    @PostMapping("/criar")
+    public ResponseEntity<?> criar(@RequestBody Artigo artigo) {
+        return  this.artigoService.criar(artigo);
+    }
+    @PutMapping("/atualizar-artigo/{id}")
+    public ResponseEntity<?> atualizarArtigo(@PathVariable("id") String id,
+                                             //@Valide confere as anotações de validação da classe
+                                             @Valid @RequestBody Artigo artigo) {
+        return this.artigoService.atualizarArtigo(id, artigo);
+    }
+
+    /*@PostMapping
     public Artigo criar(@RequestBody Artigo artigo){
         return this.artigoService.criar(artigo);
-    }
+    }*/
 
     @GetMapping("/maiordata")
     public List<Artigo> findByDataGreaterThan(@RequestParam LocalDateTime date) {

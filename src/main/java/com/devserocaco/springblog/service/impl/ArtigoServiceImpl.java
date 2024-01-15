@@ -8,6 +8,7 @@ import com.devserocaco.springblog.repository.ArtigoRepository;
 import com.devserocaco.springblog.repository.AutorRepository;
 import com.devserocaco.springblog.service.ArtigoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +65,51 @@ public class ArtigoServiceImpl implements ArtigoService {
     }
 
     @Override
+    public ResponseEntity<?> criar(Artigo artigo) {
+        if(artigo.getAutor().getCodigo() != null) {
+            Autor autor = this.autorRepository
+                    .findById(artigo.getAutor().getCodigo())
+                    .orElseThrow(() -> new IllegalArgumentException("Autor Inexistente"));
+            artigo.setAutor(autor);
+        }else {
+            artigo.setAutor(null);
+        }
+        try {
+            this.artigoRepository.save(artigo);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (DuplicateKeyException e) {
+            return  ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Artigo ja existe na coleção: " + e);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao criar  artigo:" + e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> atualizarArtigo(String id, Artigo artigo) {
+        try {
+            Artigo existenteArtigo =
+                    this.artigoRepository.findById(id).orElse(null);
+            if (existenteArtigo == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Artigo não encontrado na coleção.");
+            }
+            existenteArtigo.setTitulo(artigo.getTitulo());
+            existenteArtigo.setData(artigo.getData());
+            existenteArtigo.setTexto(artigo.getTexto());
+            existenteArtigo.setCodigo(artigo.getCodigo());
+            this.artigoRepository.save(existenteArtigo);
+            return ResponseEntity.status(HttpStatus.OK).build();
+
+        }  catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao criar  artigo:" + e.getMessage());
+        }
+
+    }
+
+/*    @Override
     @Transactional
     public Artigo criar(Artigo artigo) {
 
@@ -93,7 +139,7 @@ public class ArtigoServiceImpl implements ArtigoService {
 
 
 
-    }
+    }*/
 
     @Override
     public List<Artigo> findByDataGreaterThan(LocalDateTime data) {
